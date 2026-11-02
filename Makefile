@@ -1,9 +1,11 @@
+CFLAGS = -Wall -Wextra -Werror -pedantic -std=c99
+SRC = src/main.c src/chip8.c
+BIN = chip8
 
-src_files := src/*.c
-all: clean chip8
+all: clean build
 
-chip8: $(src_files)
-	gcc -Wall -Wextra -Werror -std=c99 src/main.c -o chip8
+build: $(SRC)
+	$(CC)  $(CFLAGS) $(SRC) -o $(BIN)
 
 clean:
-	rm -f chip8
+	rm -f $(BIN)
