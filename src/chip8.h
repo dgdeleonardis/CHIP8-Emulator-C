@@ -58,8 +58,29 @@ typedef struct
 	unsigned char key[16];
 } Chip8;
 
+/* keyboard enum */
+typedef enum {
+	CHIP8_KEY_1 = 0,
+	CHIP8_KEY_2,
+	CHIP8_KEY_3,
+	CHIP8_KEY_4,
+	CHIP8_KEY_Q,
+	CHIP8_KEY_W,
+	CHIP8_KEY_E,
+	CHIP8_KEY_R,
+	CHIP8_KEY_A,
+	CHIP8_KEY_S,
+	CHIP8_KEY_D,
+	CHIP8_KEY_F,
+	CHIP8_KEY_Z,
+	CHIP8_KEY_X,
+	CHIP8_KEY_C,
+	CHIP8_KEY_V
+
+} Chip8_Key;
+
 /**
- * chip8Init - create and initialize chip8 instance
+ * chip8Init - create and initialize Chip8 instance
  *
  * Return: pointer to chip8 struct. 
  */
@@ -67,8 +88,15 @@ Chip8* chip8Init(void);
 
 /**
  * chip8Destroy - destroy a chip8 instance
- * @chip: pointer to chip8 instance, may be NULL
+ * @chip: pointer to Chip8 instance, may be NULL
  */
 void chip8Destroy(Chip8* chip);
+
+/**
+ * chip8LoadProgram - load on memory the given program
+ * @chip: pointer to Chip8 instance, may be NULL
+ * @program: path of program to load
+ */
+void chip8LoadProgram(Chip8* chip, char *program);
 
 #endif /* CHIP8_H */

@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define CHIP8_MEMORY_MAP_PROGRAM_START_ADDRESS (0x200u)
+
 /* font */
 static const unsigned char CHIP8_FONTSET[80] = {
   0xF0, 0x90, 0x90, 0x90, 0xF0, /* 0 */
@@ -23,7 +25,7 @@ static const unsigned char CHIP8_FONTSET[80] = {
   0xF0, 0x80, 0xF0, 0x80, 0x80  /* F */
 };
 
-Chip8* chip8Init(void) 
+Chip8* chip8Init(void)
 {
 	Chip8* chip = calloc(1, sizeof(Chip8));
 	if (chip == NULL)
@@ -52,4 +54,40 @@ void chip8Destroy(Chip8 *chip)
 		free(chip);
 		printf("[INFO] - Machine destroyed\n");
 	}
+}
+
+void chip8LoadProgram(Chip8* chip, char *program)
+{
+	FILE *fp = fopen(program, "r");
+	if (fp == NULL)
+	{
+		printf("[ERROR] - Cannot open '%s'\n", program);
+		exit(1);
+	}
+	else
+	{
+		int c = 0;
+		unsigned memp = CHIP8_MEMORY_MAP_PROGRAM_START_ADDRESS;
+		/* standard C I/O file reading loop */
+		while ((c = fgetc(fp)) != EOF)
+		{
+			if (memp >= 0xFFF)
+			{
+				printf("[ERROR] - ROM '%s' too big\n", program);
+				exit(1);
+			}
+
+			chip->memory[memp] = (unsigned char) c;
+			memp++;
+		}
+		
+		if ((c == EOF) && (memp == CHIP8_MEMORY_MAP_PROGRAM_START_ADDRESS))
+		{
+			printf("[ERROR] - ROM '%s' empty\n", program);
+			exit(1);
+		}
+
+		printf("[INFO] - ROM loaded at %.3x (first byte: 0x00)\n", CHIP8_MEMORY_MAP_PROGRAM_START_ADDRESS);
+	}
+	return;
 }
