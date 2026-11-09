@@ -14,8 +14,16 @@ int main(int argc, char *argv[])
 		/* load ROM */
 		chip8LoadProgram(chip, argv[1]);
 
-		printf("[INFO] - pc = 0x%.3x, I = 0x%.3x, sp = %d\n", chip->pc, chip->I, chip->sp); 
-	}
+		printf("[INFO] - pc = 0x%.3x, I = 0x%.3x, sp = %d\n", chip->pc, chip->I, chip->sp);
+
+		for (int i = 0; i < 1000; i++)
+		{
+			chip8Step(chip);
+		}
+		printf("[INFO] - Stopped after 1000 instructions: pc = 0x%.3x opcode = 0x%.4x\n", 
+			chip->pc, 
+			chip->opcode);
+	} 
 	else
 	{
 		printf("Usage: ./chip8 <ROM CHIP-8>\n");

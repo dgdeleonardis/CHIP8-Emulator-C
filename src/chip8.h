@@ -99,4 +99,9 @@ void chip8Destroy(Chip8* chip);
  */
 void chip8LoadProgram(Chip8* chip, char *program);
 
+/**
+ * TODO
+ */
+void chip8Step(Chip8* chip);
+
 #endif /* CHIP8_H */

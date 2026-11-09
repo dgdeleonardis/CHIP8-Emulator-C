@@ -1,9 +1,13 @@
 #include "chip8.h"
 #include <string.h>
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 #define CHIP8_MEMORY_MAP_PROGRAM_START_ADDRESS (0x200u)
+
+#define FETCH_OPCODE(chip8) \
+	(chip8->memory[chip8->pc + 0] << 8) | (chip8->memory[chip8->pc + 1])
 
 /* font */
 static const unsigned char CHIP8_FONTSET[80] = {
@@ -30,7 +34,7 @@ Chip8* chip8Init(void)
 	Chip8* chip = calloc(1, sizeof(Chip8));
 	if (chip == NULL)
 	{
-		printf("[ERROR] - Machine allocation failed\n");				
+		printf("[ERROR] - Machine allocation failed\n");
 	}
 	else if (memcpy((void *) chip->memory, (void *) CHIP8_FONTSET, 80) == 0)
 	{
@@ -58,36 +62,55 @@ void chip8Destroy(Chip8 *chip)
 
 void chip8LoadProgram(Chip8* chip, char *program)
 {
-	FILE *fp = fopen(program, "r");
+	size_t n = 0;
+	size_t max = 4096 - CHIP8_MEMORY_MAP_PROGRAM_START_ADDRESS;
+	
+	/* open program with rb option (binary file) */
+	FILE *fp = fopen(program, "rb");
 	if (fp == NULL)
 	{
 		printf("[ERROR] - Cannot open '%s'\n", program);
 		exit(1);
 	}
-	else
+	
+	n = fread(chip->memory + CHIP8_MEMORY_MAP_PROGRAM_START_ADDRESS, 1, max, fp);
+	
+	if (ferror(fp) != 0)
 	{
-		int c = 0;
-		unsigned memp = CHIP8_MEMORY_MAP_PROGRAM_START_ADDRESS;
-		/* standard C I/O file reading loop */
-		while ((c = fgetc(fp)) != EOF)
-		{
-			if (memp >= 0xFFF)
-			{
-				printf("[ERROR] - ROM '%s' too big\n", program);
-				exit(1);
-			}
-
-			chip->memory[memp] = (unsigned char) c;
-			memp++;
-		}
-		
-		if ((c == EOF) && (memp == CHIP8_MEMORY_MAP_PROGRAM_START_ADDRESS))
-		{
-			printf("[ERROR] - ROM '%s' empty\n", program);
-			exit(1);
-		}
-
-		printf("[INFO] - ROM loaded at %.3x (first byte: 0x00)\n", CHIP8_MEMORY_MAP_PROGRAM_START_ADDRESS);
+		printf("[ERROR] - Read error on '%s'\n", program);
+		fclose(fp);
+		exit(1);
 	}
+
+	if (n == 0)
+	{
+		printf("[ERROR] - ROM '%s' empty\n", program);
+		fclose(fp);
+                exit(1);
+	}
+
+	if (fgetc(fp) != EOF)
+	{
+		printf("[ERROR] - ROM '%s' too big\n", program);
+		fclose(fp);
+		exit(1);
+	}
+
+	printf("[INFO] - ROM loaded at %.3x (first byte: 0x%x)\n", 
+		CHIP8_MEMORY_MAP_PROGRAM_START_ADDRESS, 
+		chip->memory[CHIP8_MEMORY_MAP_PROGRAM_START_ADDRESS]);
+	fclose(fp);
 	return;
+}
+
+void chip8Step(Chip8 * chip)
+{
+	if (chip->pc >= 4096)
+	{
+		printf("[INFO] - pc = 0x%.3x: out of memory\n", chip->pc);
+		exit(0);
+	}
+
+	chip->opcode = FETCH_OPCODE(chip);
+	chip->pc = chip->pc + 0x2;
 }
