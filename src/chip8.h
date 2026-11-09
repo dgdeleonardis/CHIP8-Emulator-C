@@ -6,13 +6,16 @@
 #define CHIP8_WIDTH (64)
 #define CHIP8_HEIGHT (32)
 
+#define FETCH_OPCODE(chip8) \
+         ((((unsigned short)(chip8)->memory[(chip8)->pc + 0]) << 8) | ((chip8)->memory[(chip8)->pc + 1]))
+
 typedef struct
 {
 	/* state var: 1 is running, 0 is not running */
 	unsigned char running;
 	
 	/* last opcode read */
-	unsigned char opcode;
+	unsigned short opcode;
 
 	/*
 	 * 4k memory:

@@ -6,9 +6,6 @@
 
 #define CHIP8_MEMORY_MAP_PROGRAM_START_ADDRESS (0x200u)
 
-#define FETCH_OPCODE(chip8) \
-	(chip8->memory[chip8->pc + 0] << 8) | (chip8->memory[chip8->pc + 1])
-
 /* font */
 static const unsigned char CHIP8_FONTSET[80] = {
   0xF0, 0x90, 0x90, 0x90, 0xF0, /* 0 */
@@ -107,10 +104,12 @@ void chip8Step(Chip8 * chip)
 {
 	if (chip->pc >= 4096)
 	{
-		printf("[INFO] - pc = 0x%.3x: out of memory\n", chip->pc);
-		exit(0);
+		printf("[INFO] - pc = 0x%.3x: out of memory\n", chip->pc);	
+		exit(0);	
 	}
-
+	
 	chip->opcode = FETCH_OPCODE(chip);
 	chip->pc = chip->pc + 0x2;
+
+	//printf("[DEBUG] - pc = 0x%.3x opcode = 0x%.4x\n", chip->pc, chip->opcode);
 }
